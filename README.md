@@ -1,11 +1,11 @@
 ### react 高阶组件
 
-####前言
+#### 前言
 我们都知道高阶函数是什么, 高阶组件其实是差不多的用法，只不过传入的参数变成了react组件，并返回一个新的组件.
 
 高阶组件是react应用中很重要的一部分，最大的特点就是重用组件逻辑。它并不是由React API定义出来的功能，而是由React的组合特性衍生出来的一种设计模式。
 
-####引入
+#### 引入
 先来一个简单的高阶组件
 
 ```
@@ -38,7 +38,7 @@ const simpleHoc = WrappedComponent => {
 export default simpleHoc;
 ```
 组件Usual通过simpleHoc的包装，打了一个log... 那么形如simpleHoc就是一个高阶组件了，通过接收一个组件class Usual，并返回一个组件class。 其实我们可以看到，在这个函数里，我们可以做很多操作。 而且return的组件同样有自己的生命周期，function，另外，我们看到也可以把props传给WrappedComponent(被包装的组件)。
-####装饰器模式
+#### 装饰器模式
 
 高阶组件可以看做是装饰器模式(Decorator Pattern)在React的实现。即允许向一个现有的对象添加新的功能，同时又不改变其结构，属于包装模式(Wrapper Pattern)的一种.
 
@@ -60,7 +60,7 @@ export default class Usual extends Component {
 }
 ```
 是同样的效果。当然兼容性是存在问题的，通常都是通过babel去编译的。
-###两种形式
+### 两种形式
 引入里我们写的最简单的形式，就是属性代理(Props Proxy)的形式。通过hoc包装wrappedComponent，也就是例子中的Usual，本来传给Usual的props，都在hoc中接受到了，也就是props proxy。 由此我们可以做一些操作。
 
 + 操作props
@@ -190,7 +190,7 @@ export default class Usual extends Component {
    ```
    这里我们把state，onChange等方法都放到HOC里，其实是遵从的react组件的一种规范，子组件简单，傻瓜，负责展示，逻辑与操作放到Container。比如说我们在HOC获取到用户名密码之后，再去做其他操作，就方便多了，而state，处理函数放到Form组件里，只会让Form更加笨重，承担了本不属于它的工作，这样我们可能其他地方也需要用到这个组件，但是处理方式稍微不同，就很麻烦了。
    
-###反向继承
+### 反向继承
 反向继承(Inheritance Inversion)，简称II，本来我是叫继承反转的...因为有个模式叫控制反转嘛...
 跟属性代理的方式不同的是，II采用通过 去继承WrappedComponent，本来是一种嵌套的关系，结果II返回的组件却继承了WrappedComponent，这看起来是一种反转的关系。
 通过继承WrappedComponent，除了一些静态方法，包括生命周期，state，各种function，我们都可以得到。上栗子：
@@ -239,7 +239,7 @@ export default iiHoc;
 iiHoc return的组件通过继承，拥有了Usual的生命周期及属性，所以didMount会打印，state也通过constructor执行，得到state.usual。
 其实，你还可以通过II：
 
-###渲染劫持
+### 渲染劫持
 
 这里HOC里定义的组件继承了WrappedComponent的render(渲染)，我们可以以此进行hijack(劫持)，也就是控制它的render函数。栗子：
 
@@ -270,7 +270,7 @@ class Usual extends Component {
   ...
 }
 ```
-###注意点
+### 注意点
 + 最重要的原则就是，注意高阶组件不会修改子组件，也不拷贝子组件的行为。高阶组件只是通过组合的方式将子组件包装在容器组件中，是一个无副作用的纯函数
 
 + 要给hoc添加class名，便于debugger。我上面的好多栗子组件都没写class 名，请不要学我，因为我实在想不出叫什么名了... 当我们在chrome里应用React-Developer-Tools的时候，组件结构可以一目了然，所以DisplayName最好还是加上。
@@ -298,5 +298,6 @@ class Usual extends Component {
   }
 }
 ```
-###总结
-   高阶组件最大的好处就是解耦和灵活性，在react的开发中还是很有用的。
+### 总结
+
+ 高阶组件最大的好处就是解耦和灵活性，在react的开发中还是很有用的。

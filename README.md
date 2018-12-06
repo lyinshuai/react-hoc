@@ -66,130 +66,130 @@ export default class Usual extends Component {
 
 + 操作props
 
-  最直观的就是接受到props，我们可以做任何读取，编辑，删除的很多自定义操作。包括hoc中定义的自定义事件，都可以通过props再传下去。
-    ```angular2
-    import React, { Component } from 'react';
-    
-    const propsProxyHoc = WrappedComponent => class extends Component {
-    
-      handleClick() {
-        console.log('click');
-      }
-    
-      render() {
-        return (<WrappedComponent
-          {...this.props}
-          handleClick={this.handleClick}
-        />);
-      }
-    };
-    export default propsProxyHoc;
-    ```
-  然后我们的Usual组件render的时候, console.log(this.props) 会得到handleClick.
+最直观的就是接受到props，我们可以做任何读取，编辑，删除的很多自定义操作。包括hoc中定义的自定义事件，都可以通过props再传下去。
+```angular2
+import React, { Component } from 'react';
+
+const propsProxyHoc = WrappedComponent => class extends Component {
+
+  handleClick() {
+    console.log('click');
+  }
+
+  render() {
+    return (<WrappedComponent
+      {...this.props}
+      handleClick={this.handleClick}
+    />);
+  }
+};
+export default propsProxyHoc;
+```
+然后我们的Usual组件render的时候, console.log(this.props) 会得到handleClick.
 
 + refs获取组件实例
 
-  当我们包装Usual的时候，想获取到它的实例怎么办，可以通过引用(ref),在Usual组件挂载的时候，会执行ref的回调函数，在hoc中取到组件的实例。通过打印，可以看到它的props， state，都是可以取到的。
-  
-  ```
-  import React, { Component } from 'react';
-  
-  const refHoc = WrappedComponent => class extends Component {
-  
-    componentDidMount() {
-      console.log(this.instanceComponent, 'instanceComponent');
-    }
-  
-    render() {
-      return (<WrappedComponent
-        {...this.props}
-        ref={instanceComponent => this.instanceComponent = instanceComponent}
-      />);
-    }
-  };
-  
-  export default refHoc;
-  ```
+当我们包装Usual的时候，想获取到它的实例怎么办，可以通过引用(ref),在Usual组件挂载的时候，会执行ref的回调函数，在hoc中取到组件的实例。通过打印，可以看到它的props， state，都是可以取到的。
+
+```
+import React, { Component } from 'react';
+
+const refHoc = WrappedComponent => class extends Component {
+
+componentDidMount() {
+  console.log(this.instanceComponent, 'instanceComponent');
+}
+
+render() {
+  return (<WrappedComponent
+    {...this.props}
+    ref={instanceComponent => this.instanceComponent = instanceComponent}
+  />);
+}
+};
+
+export default refHoc;
+```
 + 抽离state
-  
-  这里不是通过ref获取state， 而是通过 { props, 回调函数 } 传递给wrappedComponent组件，通过回调函数获取state。这里用的比较多的就是react处理表单的时候。通常react在处理表单的时候，一般使用的是受控组件，即把input都做成受控的，改变value的时候，用onChange事件同步到state中。当然这种操作通过Container组件也可以做到，具体的区别放到后面去比较。看一下代码就知道怎么回事了：
-  
-  ```
-    // 普通组件Login
-    import React, { Component } from 'react';
-    import formCreate from './form-create';
-      
-    @formCreate
-    export default class Login extends Component {
-      render() {
-        return (
-          <div>
-            <div>
-              <label id="username">
-                账户
-              </label>
-              <input name="username" {...this.props.getField('username')}/>
-            </div>
-            <div>
-              <label id="password">
-                密码
-              </label>
-              <input name="password" {...this.props.getField('password')}/>
-            </div>
-            <div onClick={this.props.handleSubmit}>提交</div>
-            <div>other content</div>
-          </div>
-        )
-      }
+
+这里不是通过ref获取state， 而是通过 { props, 回调函数 } 传递给wrappedComponent组件，通过回调函数获取state。这里用的比较多的就是react处理表单的时候。通常react在处理表单的时候，一般使用的是受控组件，即把input都做成受控的，改变value的时候，用onChange事件同步到state中。当然这种操作通过Container组件也可以做到，具体的区别放到后面去比较。看一下代码就知道怎么回事了：
+
+```
+// 普通组件Login
+import React, { Component } from 'react';
+import formCreate from './form-create';
+
+@formCreate
+export default class Login extends Component {
+render() {
+  return (
+    <div>
+      <div>
+        <label id="username">
+          账户
+        </label>
+        <input name="username" {...this.props.getField('username')}/>
+      </div>
+      <div>
+        <label id="password">
+          密码
+        </label>
+        <input name="password" {...this.props.getField('password')}/>
+      </div>
+      <div onClick={this.props.handleSubmit}>提交</div>
+      <div>other content</div>
+    </div>
+  )
+}
+}
+```
+```
+//HOC
+import React, { Component } from 'react';
+
+const formCreate = WrappedComponent => class extends Component {
+
+constructor() {
+  super();
+  this.state = {
+    fields: {},
+  }
+}
+
+onChange = key => e => {
+  this.setState({
+    fields: {
+      ...this.state.fields,
+      [key]: e.target.value,
     }
-  ```
-  ```
-    //HOC
-    import React, { Component } from 'react';
-    
-    const formCreate = WrappedComponent => class extends Component {
-    
-      constructor() {
-        super();
-        this.state = {
-          fields: {},
-        }
-      }
-    
-      onChange = key => e => {
-        this.setState({
-          fields: {
-            ...this.state.fields,
-            [key]: e.target.value,
-          }
-        })
-      }
-    
-      handleSubmit = () => {
-        console.log(this.state.fields);
-      }
-    
-      getField = fieldName => {
-        return {
-          onChange: this.onChange(fieldName),
-        }
-      }
-    
-      render() {
-        const props = {
-          ...this.props,
-          handleSubmit: this.handleSubmit,
-          getField: this.getField,
-        }
-    
-        return (<WrappedComponent
-          {...props}
-        />);
-      }
-    };
-    export default formCreate;
-   ```
-   这里我们把state，onChange等方法都放到HOC里，其实是遵从的react组件的一种规范，子组件简单，傻瓜，负责展示，逻辑与操作放到Container。比如说我们在HOC获取到用户名密码之后，再去做其他操作，就方便多了，而state，处理函数放到Form组件里，只会让Form更加笨重，承担了本不属于它的工作，这样我们可能其他地方也需要用到这个组件，但是处理方式稍微不同，就很麻烦了。
+  })
+}
+
+handleSubmit = () => {
+  console.log(this.state.fields);
+}
+
+getField = fieldName => {
+  return {
+    onChange: this.onChange(fieldName),
+  }
+}
+
+render() {
+  const props = {
+    ...this.props,
+    handleSubmit: this.handleSubmit,
+    getField: this.getField,
+  }
+
+  return (<WrappedComponent
+    {...props}
+  />);
+}
+};
+export default formCreate;
+```
+这里我们把state，onChange等方法都放到HOC里，其实是遵从的react组件的一种规范，子组件简单，傻瓜，负责展示，逻辑与操作放到Container。比如说我们在HOC获取到用户名密码之后，再去做其他操作，就方便多了，而state，处理函数放到Form组件里，只会让Form更加笨重，承担了本不属于它的工作，这样我们可能其他地方也需要用到这个组件，但是处理方式稍微不同，就很麻烦了。
    
 ### 反向继承
 反向继承(Inheritance Inversion)，简称II，本来我是叫继承反转的...因为有个模式叫控制反转嘛...

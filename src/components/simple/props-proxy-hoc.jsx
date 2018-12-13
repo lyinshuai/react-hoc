@@ -5,7 +5,9 @@ const propsProxyHoc = WrappedComponent => class extends Component {
   handleClick() {
     console.log('click');
   }
-
+  componentDidMount() {
+      console.log('propsProxyHoc', 'propsProxyHoc');
+  }
   render() {
     return (<WrappedComponent
       {...this.props}

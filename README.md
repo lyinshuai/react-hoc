@@ -302,3 +302,70 @@ class Usual extends Component {
 ### 总结
 
  高阶组件最大的好处就是解耦和灵活性，在react的开发中还是很有用的。
+ 
+ ## react 高阶组件之参数传递
+ 先来回顾下什么是高阶组件：高阶函数的定义接收函数作为输入，或者输出另一个函数的一类函数，被称作高阶函数。对于高阶组件，它描述的便是接受React组件作为输入，输出一个新的React组件的组件。
+ 
+ 现在我们来一起研究高阶组件的参数，他并非只能是一个组件，他还可以接收其他参数。
+ 
+ 先来看一个简单的例子：
+ ```
+const simpleHoc = (key) => WrappedComponent => {
+  return class extends Component {
+    render() {
+    console.log(key);
+      return <WrappedComponent {...this.props}/>
+    }
+  }
+}
+
+class MyComponent extends Component {
+  render() {
+    console.log('props', this.props);
+    console.log('state', this.state);
+    return (
+      <div>
+        MyComponent
+      </div>
+    )
+  }
+}
+
+export default simpleHoc('我是个参数')(MyComponent);
+```
+实际上这种形式的高阶组件大量出现在第三方库中，例如react-redux中的connect函数就是一个典型的例子。connect的简化定义如下：
+```
+connect(mapStateTopProps, mapDispatchToProps)(WrappedComponent);
+```
+这个函数会将一个react组件链接到redux的store上，在链接过程中connect通过函数参数mapStateTopProps从全局store中去除当前组件需要的state,并把state转化成当前组件的props;同时通过函数参数mapDispatchToProps把当前组件用到redux的action creators 以props的方式传递给当前组件。
+
+这里注意：
+
+connect并不会修改传递进去的组件定义，而是会返回一个新组件。
+这种形式的高阶组件非常容易组合起来使用，例如有f,g,h三个高阶组件，都只接口一个组件为参数，于是我们可以这样嵌套使用：f(g(h(WrappedComponent)))。 这样的话有一个问题就是只能最内层即h这个高阶组件可以接收多个参数，其他高阶组件却只能接收一个参数。
+
+再例如我们将connect和另外一个高阶组件simpleHoc联合起来：
+这里我们可以定义一个工具函数：
+
+代码如下：
+```
+const compose = (...funcs) => {
+  if(funcs.length === 0) {
+    return arg => arg
+  }
+  if(funcs.length === 1) {
+      return funcs[0]
+  }
+  return funcs.reduce((a,b) => (...args) => a(b(...args)));
+}
+
+compose(...funcs)
+```
+这里调用compose函数可以把高阶组件的嵌套写法打平。例如：
+
+```
+compose(f,g,h)(WrappedComponent);
+
+compose(connect(mapStateTopProps),simpleHoc('我是个参数'))（MyComponent）
+```
+这里调用compose(f,g,h)等价于(...args) => f(g(h(...args)))。

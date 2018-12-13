@@ -1,12 +1,13 @@
-const compose = (...funcs) => (component) => {
-  if (funcs.lenght === 0) {
-    return component;
+const compose =(...funcs) => {
+  if(funcs.length === 0) {
+    return arg => arg
   }
-  const last = funcs[funcs.length - 1];
-  console.log('compose', funcs.reduceRight((res, cur) => cur(res), last(component)));
-  return funcs.reduceRight((res, cur) => cur(res), last(component));
-};
+  if(funcs.length === 1) {
+      return funcs[0]
+  }
+  return funcs.reduce((a,b) => (...args) => a(b(...args)));
+}
 
 export {
-  compose,
+  compose
 };

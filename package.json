@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "react": "^15.6.1",
+    "react-compose": "^2.0.0",
     "react-dom": "^15.6.1",
     "react-router-dom": "^4.1.1"
   }

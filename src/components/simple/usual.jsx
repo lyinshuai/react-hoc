@@ -2,13 +2,11 @@ import React, { Component } from 'react';
 import simpleHoc from './simple-hoc';
 import propsProxyHoc from './props-proxy-hoc';
 import refHoc from './ref-hoc';
-import { compose } from '../../utils';
+import { compose} from '../../utils';
 
 // 注意我这里写的顺序。
-@simpleHoc
-@propsProxyHoc
-@refHoc
-export default class Usual extends Component {
+
+class Usual extends Component {
   
   constructor() {
     super();
@@ -28,4 +26,4 @@ export default class Usual extends Component {
   }
 }
 
-// export default compose(simpleHoc, propsProxyHoc, refHoc)(Usual);
+export default compose(simpleHoc('我是个参数'), propsProxyHoc, refHoc)(Usual);
